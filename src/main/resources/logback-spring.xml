@@ -1,0 +1,120 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+
+<configuration scan="false" scanPeriod="60 seconds" debug="false">
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+
+    <springProperty scope="context" name="LOG_HOME" source="logging.path" defaultValue="./logs"/>
+    <springProperty scope="context" name="LOG_BAK" source="logging.path-history" defaultValue="./logs.history"/>
+    <property name="APP_NAME" value="jiangbei-hotel-api-client"/>
+    <property name="CONSOLE_PATTERN"
+              value="${CONSOLE_PATTERN:-%d{MM-dd HH:mm:ss.SSS}[%highlight(%-5p)][%magenta(%10.10t)][%cyan(%-40.40c{20})][%yellow(%4L)]: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+    <property name="FILE_PATTERN" value="${FILE_PATTERN:-%d{MM-dd HH:mm:ss}[%-5p][%10.10t][%-40.40c{20}]: %m%n}"/>
+    <property name="FILE_ERROR_PATTERN"
+              value="${FILE_ERROR_PATTERN:-%d{MM-dd HH:mm:ss}[%-5p][%10.10t][%-40.40c{20}][%4L]: %m%n${LOG_EXCEPTION_CONVERSION_WORD:-%wEx}}"/>
+
+    <!-- ALL < TRACE < DEBUG < INFO < WARN < ERROR < OFF -->
+    <appender name="STDOUT" class="ch.qos.logback.core.ConsoleAppender">
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>DEBUG</level>
+        </filter>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <pattern>${CONSOLE_PATTERN}</pattern>
+            <charset>UTF-8</charset>
+        </encoder>
+    </appender>
+
+    <appender name="FILE_ERROR" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${APP_NAME}.error.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_BAK}/%d{yyyy-MM}/${APP_NAME}-%d{yyyy-MM-dd}.error.log.zip</FileNamePattern>
+            <MaxHistory>31</MaxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${FILE_ERROR_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE_WARN" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${APP_NAME}.warn.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>WARN</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_BAK}/%d{yyyy-MM}/${APP_NAME}-%d{yyyy-MM-dd}.warn.log.zip</FileNamePattern>
+            <MaxHistory>31</MaxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+    <appender name="FILE_INFO" class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${LOG_HOME}/${APP_NAME}.info.log</file>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <FileNamePattern>${LOG_BAK}/%d{yyyy-MM}/${APP_NAME}-%d{yyyy-MM-dd}.info.log.zip</FileNamePattern>
+            <MaxHistory>31</MaxHistory>
+            <totalSizeCap>1GB</totalSizeCap>
+        </rollingPolicy>
+        <encoder class="ch.qos.logback.classic.encoder.PatternLayoutEncoder">
+            <charset>UTF-8</charset>
+            <pattern>${FILE_PATTERN}</pattern>
+        </encoder>
+    </appender>
+
+    <logger name="org.hibernate" level="ERROR"/>
+    <logger name="org.springframework.jmx.export.annotation.AnnotationMBeanExporter" level="ERROR"/>
+    <logger name="com.netflix.config.sources.URLConfigurationSource" level="WARN"/>
+    <logger name="com.netflix.discovery.provider.DiscoveryJerseyProvider" level="ERROR"/>
+    <logger name="org.springframework.boot.actuate.endpoint.mvc.EndpointHandlerMapping" level="WARN"/>
+    <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping" level="WARN"/>
+    <logger name="org.springframework.context.support.PostProcessorRegistrationDelegate" level="WARN"/>
+
+    <springProfile name="prod">
+        <logger name="org.springframework.boot.actuate.endpoint.mvc.EndpointHandlerMapping" level="ERROR"/>
+        <logger name="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerMapping"
+                level="ERROR"/>
+        <logger name="org.springframework.boot.web.servlet.FilterRegistrationBean" level="ERROR"/>
+        <logger name="org.springframework.boot.web.servlet.DelegatingFilterProxyRegistrationBean" level="WARN"/>
+        <logger name="org.springframework.security.web.DefaultSecurityFilterChain" level="WARN"/>
+        <root level="INFO">
+            <appender-ref ref="FILE_INFO"/>
+            <!--			<appender-ref ref="FILE_WARN" />-->
+            <appender-ref ref="FILE_ERROR"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="test,qa,fat1,uat,pro">
+        <root level="INFO">
+            <appender-ref ref="FILE_INFO"/>
+            <appender-ref ref="FILE_WARN"/>
+            <appender-ref ref="FILE_ERROR"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+    <springProfile name="local,dev">
+        <root level="INFO">
+            <appender-ref ref="FILE_INFO"/>
+            <appender-ref ref="FILE_ERROR"/>
+            <appender-ref ref="STDOUT"/>
+        </root>
+    </springProfile>
+
+</configuration>
