@@ -1,10 +1,11 @@
-package com.atguigu.netty.demo.netty.simple;
+package com.atguigu.netty.demo.netty.codec2;
 
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.*;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
+import io.netty.handler.codec.protobuf.ProtobufDecoder;
 
 /**
  * @ClassName:NettyServer
@@ -39,6 +40,9 @@ public class NettyServer {
                     //给pipeline设置处理器
                     @Override
                     protected void initChannel(SocketChannel socketChannel) throws Exception {
+                        //在pipeline加入ProtoBufDecoder
+                        //指定对那种对象进行解码
+                        socketChannel.pipeline().addLast("decoder",new ProtobufDecoder(MyDataInfo.MyMessage.getDefaultInstance()));
                         socketChannel.pipeline().addLast(new NettyServerHandler());
                     }
                 }); //给我们的workerGroup的EventLoop对应的管道设置处理器
@@ -46,7 +50,7 @@ public class NettyServer {
 
         //绑定一个端口并且同步,生成了一个ChannelFuture对象
         //启动服务器(并绑定端口)
-        ChannelFuture channelFuture = bootstrap.bind(6667).sync();
+        ChannelFuture channelFuture = bootstrap.bind(6666).sync();
 
         //channelFuture注册监听器,监控我们关心的事件
         channelFuture.addListener(new ChannelFutureListener() {
